@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import home.babbakappa.labflow.AppViewModel
-import home.babbakappa.labflow.UIState
+import home.babbakappa.labflow.manager.AppViewModel
+import home.babbakappa.labflow.manager.UIState
 
 @Composable
 fun MainHub(vm: AppViewModel) {

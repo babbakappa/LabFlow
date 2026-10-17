@@ -1,4 +1,4 @@
-package home.babbakappa.labflow.core.database
+package home.babbakappa.labflow.database.database
 
 import android.content.Context
 import androidx.room.Database

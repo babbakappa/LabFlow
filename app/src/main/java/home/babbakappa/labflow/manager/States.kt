@@ -1,4 +1,4 @@
-package home.babbakappa.labflow
+package home.babbakappa.labflow.manager
 
 enum class UIState {
     START_SCREEN,

@@ -5,19 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import home.babbakappa.labflow.appui.MainHub
-import home.babbakappa.labflow.core.database.AppDatabase
-import home.babbakappa.labflow.core.repos.Repository
-import home.babbakappa.labflow.ui.theme.LabFlowTheme
+import home.babbakappa.labflow.database.database.AppDatabase
+import home.babbakappa.labflow.manager.AppViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -27,8 +19,7 @@ class MainActivity : ComponentActivity() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val database = AppDatabase.getDatabase(applicationContext)
                 val dao = database.databaseDao()
-                val rep = Repository(dao)
-                return AppViewModel(rep) as T
+                return AppViewModel(dao) as T
             }
         }
     }

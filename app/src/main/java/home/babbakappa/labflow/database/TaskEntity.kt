@@ -1,4 +1,4 @@
-package home.babbakappa.labflow.core.database
+package home.babbakappa.labflow.database.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
