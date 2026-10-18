@@ -32,7 +32,13 @@ fun MainHub(vm: AppViewModel) {
         }
 
         UIState.CREATE_SCREEN -> {
-
+            CreateTableScreen(
+                onTakeData = {
+                    subjectName, labCount, stepsCount, gradeMethod ->
+                    vm.createNewSubject(subjectName, labCount, stepsCount, gradeMethod)
+                },
+                onClickBack = { vm.changeUIState(UIState.START_SCREEN) }
+            )
         }
     }
 

@@ -35,7 +35,7 @@ fun StartScreen(
                 .systemBarsPadding()
         ) {
 
-            Head()
+            HeadOfStartScreen()
             FirstButtons(
                 onOpenSubjects,
                 onCreateSubject
@@ -48,7 +48,7 @@ fun StartScreen(
 }
 
 @Composable
-fun Head() {
+fun HeadOfStartScreen() {
     Box(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight(0.1f),
@@ -78,12 +78,6 @@ fun FirstButtons(
 
             Button(
                 onClick = onOpenSubjects,
-                colors = ButtonColors(
-                    containerColor = BUTTON_COLOR,
-                    contentColor = TEXT_COLOR_OTHER,
-                    disabledContainerColor = BUTTON_COLOR,
-                    disabledContentColor = TEXT_COLOR_OTHER
-                )
             ) {
                 Text(
                     "Открыть"
@@ -91,16 +85,10 @@ fun FirstButtons(
             }
 
             Button(
-                onClick = onCreateSubject,
-                colors = ButtonColors(
-                    containerColor = BUTTON_COLOR,
-                    contentColor = TEXT_COLOR_OTHER,
-                    disabledContainerColor = BUTTON_COLOR,
-                    disabledContentColor = TEXT_COLOR_OTHER
-                )
+                onClick = onCreateSubject
             ) {
                 Text(
-                    "Редактировать"
+                    "Создать"
                 )
             }
 
