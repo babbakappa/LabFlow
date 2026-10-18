@@ -27,4 +27,7 @@ interface DatabaseDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addTasks(tasks: List<TaskEntity>)
 
+    @Query("SELECT DISTINCT subject_name FROM tasks")
+    fun getOnlySubjectNames(): Flow<List<String>>
+
 }

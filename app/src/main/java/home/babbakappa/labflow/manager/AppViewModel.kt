@@ -1,6 +1,7 @@
 package home.babbakappa.labflow.manager
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import home.babbakappa.labflow.database.database.DatabaseDAO
@@ -8,10 +9,12 @@ import home.babbakappa.labflow.database.database.GRADES
 import home.babbakappa.labflow.database.database.NO_GRADE
 import home.babbakappa.labflow.database.database.NO_PASS
 import home.babbakappa.labflow.database.database.TaskEntity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -23,7 +26,16 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
     private val _currentSubject = MutableStateFlow("")
     val currentSubject = _currentSubject.asStateFlow()
 
-    val tasks = db.getSubjectTasks(currentSubject.value).stateIn(
+    val allSubjectNames = db.getOnlySubjectNames().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+
+    )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val tasks = _currentSubject.flatMapLatest { subject ->
+        db.getSubjectTasks(subject) // Каждый раз при смене subject, Room будет давать новый Flow
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()

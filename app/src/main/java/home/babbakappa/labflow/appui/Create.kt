@@ -173,7 +173,9 @@ fun TextFields(
             label = { Text("Количество этапов") }
         )
 
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
             Column {
 

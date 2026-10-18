@@ -12,6 +12,8 @@ fun MainHub(vm: AppViewModel) {
 
     val tasks by vm.tasks.collectAsStateWithLifecycle()
     val uiState by vm.uiState.collectAsState()
+    val currentName by vm.currentSubject.collectAsState()
+    val names by vm.allSubjectNames.collectAsState()
 
     when (uiState) {
         UIState.START_SCREEN -> StartScreen(
@@ -24,11 +26,22 @@ fun MainHub(vm: AppViewModel) {
         )
 
         UIState.SELECT_SCREEN -> {
-            SelectScreen()
+            SelectScreen(
+                names,
+                onClickItem = { newName ->
+                    vm.changeCurrentSubject(newName)
+                    vm.changeUIState(UIState.SUBJECT_SCREEN)
+                }
+            )
         }
 
-        UIState.LABS_SCREEN -> {
-
+        UIState.SUBJECT_SCREEN -> {
+            SubjectScreen(tasks,
+                currentName,
+                onClickBack = {
+                    vm.changeUIState(UIState.START_SCREEN)
+                }
+            )
         }
 
         UIState.CREATE_SCREEN -> {
