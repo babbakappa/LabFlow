@@ -16,15 +16,15 @@ interface DatabaseDAO {
     fun getAllTasks(): Flow<List<TaskEntity>>
 
     @Query("DELETE FROM tasks")
-    fun deleteAllTasks()
+    suspend fun deleteAllTasks()
 
     @Query("DELETE FROM tasks WHERE subject_name = :subjectName")
-    fun deleteSubjectTasks(subjectName: String)
+    suspend fun deleteSubjectTasks(subjectName: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addTask(task: TaskEntity)
+    suspend fun addTask(task: TaskEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addTasks(tasks: List<TaskEntity>)
+    suspend fun addTasks(tasks: List<TaskEntity>)
 
 }

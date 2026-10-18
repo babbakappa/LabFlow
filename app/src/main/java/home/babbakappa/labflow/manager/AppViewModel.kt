@@ -44,25 +44,30 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         methodGrade: String
     ) {
 
-        try {
-            var list = mutableListOf<TaskEntity>()
-            for (i in 0 until labCount) {
-                var tempObject = TaskEntity(
-                    subjectName = subjectName,
-                    howMuchStatuses = stepsCount,
-                    grade = if (methodGrade == GRADES) NO_GRADE else NO_PASS,
-                    done = false,
-                    labNumber = "",
-                    labTopic = "",
-                    statusesDone = 0
-                )
-                list.add(tempObject)
+        viewModelScope.launch {
+
+            try {
+                var list = mutableListOf<TaskEntity>()
+                for (i in 0 until labCount) {
+                    var tempObject = TaskEntity(
+                        subjectName = subjectName,
+                        howMuchStatuses = stepsCount,
+                        grade = if (methodGrade == GRADES) NO_GRADE else NO_PASS,
+                        done = false,
+                        labNumber = "",
+                        labTopic = "",
+                        statusesDone = 0
+                    )
+                    list.add(tempObject)
+                }
+                db.addTasks(list)
             }
-            db.addTasks(list)
+            catch (error: Exception) {
+                Log.e("Ошибка!", "$error")
+            }
+
         }
-        catch (error: Exception) {
-            Log.e("Ошибка!", "$error")
-        }
+
 
     }
 
