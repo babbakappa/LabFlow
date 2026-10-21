@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import home.babbakappa.labflow.database.database.DatabaseDAO
 import home.babbakappa.labflow.database.database.GRADES
+import home.babbakappa.labflow.database.database.NOT_ACTIVE
+import home.babbakappa.labflow.database.database.NOT_DONE
 import home.babbakappa.labflow.database.database.NO_GRADE
 import home.babbakappa.labflow.database.database.NO_PASS
 import home.babbakappa.labflow.database.database.TaskEntity
@@ -33,7 +35,7 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
 
     )
     @OptIn(ExperimentalCoroutinesApi::class)
-    val tasks = _currentSubject.flatMapLatest { subject ->
+    val currentTasks = _currentSubject.flatMapLatest { subject ->
         db.getSubjectTasks(subject) // Каждый раз при смене subject, Room будет давать новый Flow
     }.stateIn(
         scope = viewModelScope,
@@ -52,23 +54,34 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
     fun createNewSubject(
         subjectName: String,
         labCount: Int,
-        stepsCount: Int,
+        activeSteps: Int,
         methodGrade: String
     ) {
 
         viewModelScope.launch {
 
             try {
+                var statuses = mutableListOf<Int>()
+                for (i in 0..4) {
+                    if (i >= activeSteps) {
+                        statuses.add(NOT_ACTIVE)
+                    }
+                    else {
+                        statuses.add(NOT_DONE)
+                    }
+                }
                 var list = mutableListOf<TaskEntity>()
                 for (i in 0 until labCount) {
                     var tempObject = TaskEntity(
                         subjectName = subjectName,
-                        howMuchStatuses = stepsCount,
                         grade = if (methodGrade == GRADES) NO_GRADE else NO_PASS,
                         done = false,
                         labNumber = "",
                         labTopic = "",
-                        statusesDone = 0
+                        status1 = statuses[0],
+                        status2 = statuses[1],
+                        status3 = statuses[2],
+                        status4 = statuses[3]
                     )
                     list.add(tempObject)
                 }
@@ -81,6 +94,29 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         }
 
 
+    }
+
+    fun changeStatusByItsNumber(number: Int, newStatus: Int, id: Long) {
+
+        viewModelScope.launch {
+
+            when (number) {
+
+                1 -> db.setNewStatus1(newStatus, id)
+                2 -> db.setNewStatus2(newStatus, id)
+                3 -> db.setNewStatus3(newStatus, id)
+                4 -> db.setNewStatus4(newStatus, id)
+
+            }
+
+        }
+
+    }
+
+    fun changeNumber(newNumber: String, id: Long) {
+        viewModelScope.launch {
+            db.changeLabNumber(newNumber, id)
+        }
     }
 
 }

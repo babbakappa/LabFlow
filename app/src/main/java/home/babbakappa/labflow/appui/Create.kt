@@ -53,8 +53,9 @@ fun CreateTableScreen(
             modifier = Modifier.fillMaxSize().systemBarsPadding()
         ) {
 
-            HeadOfCreateTableScreen(
-                onClickBack = onClickBack
+            DefaultScreenHead(
+                "Создание раздела",
+                onClickBack
             )
             CreationForm(
                 onTakeData = {

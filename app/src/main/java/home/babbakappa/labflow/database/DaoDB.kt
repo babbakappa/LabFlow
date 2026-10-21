@@ -30,4 +30,19 @@ interface DatabaseDAO {
     @Query("SELECT DISTINCT subject_name FROM tasks")
     fun getOnlySubjectNames(): Flow<List<String>>
 
+    @Query("UPDATE tasks SET status_1 = :newStatus WHERE id == :givenID")
+    suspend fun setNewStatus1(newStatus: Int, givenID: Long)
+
+    @Query("UPDATE tasks SET status_2 = :newStatus WHERE id == :givenID")
+    suspend fun setNewStatus2(newStatus: Int, givenID: Long)
+
+    @Query("UPDATE tasks SET status_3 = :newStatus WHERE id == :givenID")
+    suspend fun setNewStatus3(newStatus: Int, givenID: Long)
+
+    @Query("UPDATE tasks SET status_4 = :newStatus WHERE id == :givenID")
+    suspend fun setNewStatus4(newStatus: Int, givenID: Long)
+
+    @Query("UPDATE tasks SET lab_number = :newNumber WHERE id == :id")
+    suspend fun changeLabNumber(newNumber: String, id: Long)
+
 }

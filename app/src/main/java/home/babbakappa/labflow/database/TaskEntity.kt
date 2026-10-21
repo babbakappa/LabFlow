@@ -18,11 +18,17 @@ data class TaskEntity(
     @ColumnInfo(name = "lab_topic")
     var labTopic: String,
 
-    @ColumnInfo(name = "how_much_statuses")
-    var howMuchStatuses: Int,
+    @ColumnInfo(name = "status_1")
+    var status1: Int = NOT_DONE,
 
-    @ColumnInfo(name = "statuses_done")
-    var statusesDone: Int,
+    @ColumnInfo(name = "status_2")
+    var status2: Int = NOT_ACTIVE,
+
+    @ColumnInfo(name = "status_3")
+    var status3: Int = NOT_ACTIVE,
+
+    @ColumnInfo(name = "status_4")
+    var status4: Int = NOT_ACTIVE,
 
     @ColumnInfo(name = "grade")
     var grade: Int,
@@ -40,3 +46,8 @@ val PASSES = "Зачёт/Незачёт"
 // для оценок
 val NO_GRADE = 2
 val GRADES = "Оценка"
+
+// для шагов
+val NOT_ACTIVE = -1
+val NOT_DONE = 0
+val DONE = 1
