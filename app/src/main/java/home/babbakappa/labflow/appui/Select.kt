@@ -17,103 +17,96 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import home.babbakappa.labflow.database.database.TaskEntity
-import home.babbakappa.labflow.tools.BODY_COLOR
-import home.babbakappa.labflow.tools.BOX_COLOR
-import home.babbakappa.labflow.tools.HEAD_COLOR
-import home.babbakappa.labflow.tools.TEXT_COLOR_WHITE
 
 @Composable
 fun SelectScreen(
     names: List<String>,
     onClickItem: (String) -> Unit,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onDeleteSubject: (String) -> Unit
 ) {
 
     Surface(
-        color = BODY_COLOR
     ) {
 
         Column(
-            modifier = Modifier.fillMaxSize().systemBarsPadding(),
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
         ) {
             DefaultScreenHead(
                 stringInHead = "Выбор предмета",
                 arrowBackAction = onClickBack
             )
-            LazyColumn() {
-                items(names) { name ->
-                    SubjectItem(
-                        name,
-                        onClickItem = {
-                                taken -> onClickItem(taken)
-                        }
-                    )
-                }
+
+            if (names.isEmpty()) {
+                EmptyScreen()
             }
+            else {
+
+                LazyColumn() {
+                    items(names) { name ->
+                        SubjectItem(
+                            name,
+                            onClickItem = {
+                                    taken -> onClickItem(taken)
+                            },
+                            onDeleteSubject = {name -> onDeleteSubject(name)}
+                        )
+                    }
+                }
+
+            }
+
         }
 
     }
 
 }
-
 
 @Composable
-fun HeadOfSelectScreen(
-    onClickBack: () -> Unit
-) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(0.1f)
-        .background(color = HEAD_COLOR)
+fun EmptyScreen() {
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            IconButton(
-                onClickBack
-            ) {
-
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
-
-            }
-
-            Text(
-                "Выбор предмета",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-        }
+        Text("Нет предметов", fontSize = 18.sp)
 
     }
-}
 
+}
 
 @Composable
 fun SubjectItem(
     name: String,
-    onClickItem: (String) -> Unit
+    onClickItem: (String) -> Unit,
+    onDeleteSubject: (String) -> Unit
 ) {
+
+    var menuIsOpened by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -123,17 +116,62 @@ fun SubjectItem(
                 onClickItem(name)
             }
         )
-        .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BOX_COLOR, contentColor = TEXT_COLOR_WHITE)
+        .padding(8.dp)
     ) {
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
         ) {
 
-            Text(name, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+            Text(name, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+
+            Column()
+            {
+                IconButton(
+                    onClick = { menuIsOpened = !menuIsOpened }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = null
+                    )
+                }
+                ThreeDotsMenu(
+                    menuIsOpened,
+                    onDeleteSubject = {
+                        onDeleteSubject(name)
+                    },
+                    onClose = {
+                        menuIsOpened = !menuIsOpened
+                    }
+                )
+            }
 
         }
+
+    }
+
+}
+
+@Composable
+fun ThreeDotsMenu(
+    openedMenu: Boolean,
+    onClose: () -> Unit,
+    onDeleteSubject: () -> Unit
+) {
+
+
+
+    DropdownMenu(
+        expanded = openedMenu,
+        onDismissRequest = onClose
+    ) {
+
+        DropdownMenuItem(
+            text = {Text("Удалить")},
+            onClick = onDeleteSubject
+        )
 
     }
 

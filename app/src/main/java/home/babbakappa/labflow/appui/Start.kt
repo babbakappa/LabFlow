@@ -19,11 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import home.babbakappa.labflow.tools.BODY_COLOR
-import home.babbakappa.labflow.tools.BUTTON_COLOR
-import home.babbakappa.labflow.tools.DISABLED_BUTTON_COLOR
-import home.babbakappa.labflow.tools.TEXT_COLOR_BLACK
-import home.babbakappa.labflow.tools.TEXT_COLOR_WHITE
 
 @Composable
 fun StartScreen(
@@ -32,8 +27,7 @@ fun StartScreen(
 ) {
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = BODY_COLOR
+        modifier = Modifier.fillMaxSize()
     ) {
 
         Column(
@@ -58,14 +52,13 @@ fun StartScreen(
 fun HeadOfStartScreen() {
     Box(modifier = Modifier
         .fillMaxWidth()
-        .fillMaxHeight(0.4f).background(color = BODY_COLOR),
+        .fillMaxHeight(0.4f),
         contentAlignment = Alignment.BottomCenter
     ) {
         Text(
             "Лабораторные работы",
             fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = TEXT_COLOR_BLACK
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -77,7 +70,7 @@ fun FirstButtons(
 ) {
     Box(modifier = Modifier
         .fillMaxWidth()
-        .fillMaxHeight(0.2f).background(color = BODY_COLOR),
+        .fillMaxHeight(0.2f),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -85,13 +78,7 @@ fun FirstButtons(
         ) {
 
             Button(
-                onClick = onOpenSubjects,
-                colors = ButtonColors(
-                    containerColor = BUTTON_COLOR,
-                    contentColor = TEXT_COLOR_WHITE,
-                    disabledContainerColor = DISABLED_BUTTON_COLOR,
-                    disabledContentColor = TEXT_COLOR_WHITE
-                )
+                onClick = onOpenSubjects
             ) {
                 Text(
                     "Открыть"
@@ -99,13 +86,7 @@ fun FirstButtons(
             }
 
             Button(
-                onClick = onCreateSubject,
-                colors = ButtonColors(
-                    containerColor = BUTTON_COLOR,
-                    contentColor = TEXT_COLOR_WHITE,
-                    disabledContainerColor = DISABLED_BUTTON_COLOR,
-                    disabledContentColor = TEXT_COLOR_WHITE
-                )
+                onClick = onCreateSubject
             ) {
                 Text(
                     "Создать"

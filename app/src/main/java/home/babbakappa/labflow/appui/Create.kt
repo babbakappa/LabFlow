@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -25,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,45 +73,6 @@ fun CreateTableScreen(
 }
 
 @Composable
-fun HeadOfCreateTableScreen(
-    onClickBack: () -> Unit
-) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(0.1f),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            IconButton(
-                onClickBack
-            ) {
-
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
-
-            }
-
-            Text(
-                "Создание раздела по предмету",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-        }
-
-    }
-}
-
-@Composable
 fun CreationForm(
     onTakeData: (String, Int, Int, String) -> Unit
 ) {
@@ -151,7 +114,8 @@ fun TextFields(
         OutlinedTextField(
             value = currentSubjectName,
             onValueChange = { currentSubjectName = it },
-            label = { Text("Название предмета") }
+            label = { Text("Название предмета") },
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
 
         OutlinedTextField(
@@ -161,7 +125,8 @@ fun TextFields(
                     labCount = it
                 }
             },
-            label = { Text("Количество лабораторных") }
+            label = { Text("Количество лабораторных") },
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
 
         OutlinedTextField(
@@ -171,7 +136,8 @@ fun TextFields(
                     statusCount = it
                 }
             },
-            label = { Text("Количество этапов") }
+            label = { Text("Количество этапов (не более 4)") },
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
 
         Row(
@@ -186,7 +152,22 @@ fun TextFields(
                         selectedOption = it
                     },
                     label = { Text("Оценка/Зачёт") },
-                    readOnly = true
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    trailingIcon = {
+
+                        IconButton(
+                            onClick = {
+                                expandedMenu = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null
+                            )
+                        }
+
+                    }
                 )
 
                 DropdownMenu(
@@ -211,17 +192,6 @@ fun TextFields(
                     )
                 }
 
-            }
-
-            IconButton(
-                onClick = {
-                    expandedMenu = true
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null
-                )
             }
 
         }

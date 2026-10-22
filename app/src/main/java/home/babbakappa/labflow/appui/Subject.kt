@@ -19,12 +19,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,10 +46,9 @@ import androidx.compose.ui.window.Dialog
 import home.babbakappa.labflow.database.database.DONE
 import home.babbakappa.labflow.database.database.NOT_DONE
 import home.babbakappa.labflow.database.database.TaskEntity
-import home.babbakappa.labflow.tools.BODY_COLOR
-import home.babbakappa.labflow.tools.BOX_COLOR
-import home.babbakappa.labflow.tools.HEAD_COLOR
 import home.babbakappa.labflow.tools.verifyToPlaceStepInUI
+import home.babbakappa.labflow.tools.whatToShowInGrade
+import home.babbakappa.labflow.tools.whatToShowInResult
 import home.babbakappa.labflow.tools.whatToShowInStep
 
 val DEFAULT_BOX_HEIGHT = 64.dp
@@ -57,19 +59,18 @@ val CORNER_DEGREE = 6.dp
 
 @Composable
 fun SubjectScreen(
-    tasks: List<TaskEntity>,
+    currentTasks: List<TaskEntity>,
     subjectName: String,
     onClickBack: () -> Unit,
-    onStatusChange: (Int, Int, Long) -> Unit,
+    onChangedStatus: (Int, Int, Long) -> Unit,
     onChangedNumber: (String, Long) -> Unit
 ) {
 
-    val scrollState = rememberScrollState()
+    val scrollStateHorizontal = rememberScrollState()
 
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BODY_COLOR)
     ) {
         Column(
             modifier = Modifier.systemBarsPadding(),
@@ -83,19 +84,19 @@ fun SubjectScreen(
 
             Row(
 
-                modifier = Modifier.horizontalScroll(scrollState)
+                modifier = Modifier.horizontalScroll(scrollStateHorizontal)
 
             ) {
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(tasks) {
+                    items(currentTasks) {
                             task ->
                         OneLine(
                             task,
-                            onStatusChange = { num, st, id -> onStatusChange(num, st, id) },
-                            onChangedNumber = { newValue, id -> onChangedNumber(newValue, id) }
+                            onChangedStatus = { statusNumber, newState, id -> onChangedStatus(statusNumber, newState, id) },
+                            onChangedNumber = { newNumber, id -> onChangedNumber(newNumber, id) }
                         )
                     }
                 }
@@ -108,44 +109,9 @@ fun SubjectScreen(
 }
 
 @Composable
-fun SubjectScreenHead(name: String, onClickBack: () -> Unit) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = HEAD_COLOR,
-                shape = RoundedCornerShape(CORNER_DEGREE)
-            )
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onClickBack
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null
-                )
-            }
-            Text(
-                name,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp)
-            )
-        }
-    }
-
-}
-
-@Composable
 fun OneLine(
-    obj: TaskEntity,
-    onStatusChange: (Int, Int, Long) -> Unit,
+    task: TaskEntity,
+    onChangedStatus: (Int, Int, Long) -> Unit,
     onChangedNumber: (String, Long) -> Unit
 ) {
 
@@ -154,17 +120,19 @@ fun OneLine(
     ) {
 
         BoxLabNumber(
-            obj.labNumber,
-            {newValue -> onChangedNumber(newValue, obj.id) }
+            task.labNumber,
+            {newValue -> onChangedNumber(newValue, task.id) }
         )
-        BoxLabDescription(obj.labTopic)
+        BoxLabDescription(task.labTopic)
         StepsStatuses(
-            obj.status1,
-            obj.status2,
-            obj.status3,
-            obj.status4,
-            onStatusChange = { num, st -> onStatusChange(num, st, obj.id) }
+            task.status1,
+            task.status2,
+            task.status3,
+            task.status4,
+            onStatusChange = { num, st -> onChangedStatus(num, st, task.id) }
         )
+        GradeBox(task.grade)
+        ResultBox(task.done)
 
     }
 
@@ -176,34 +144,38 @@ fun BoxLabNumber(
     onChangedNumber: (String) -> Unit
 ) {
 
-    var launchDialog by remember { mutableStateOf(false) }
+    var dialogIsActive by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .height(DEFAULT_BOX_HEIGHT)
             .width(DEFAULT_BOX_WIDTH)
             .background(
-                color = BOX_COLOR,
+                color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(CORNER_DEGREE)
             )
             .clickable(
                 onClick = {
-                    launchDialog = !launchDialog
+                    dialogIsActive = !dialogIsActive
                 }
             ),
         contentAlignment = Alignment.Center
     ) {
-        Text(number)
+        Text(
+            number,
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 26.sp
+        )
     }
 
-    if (launchDialog) {
+    if (dialogIsActive) {
         DefaultDialogWindow(
             "Номер лабораторной",
             "Номер",
             number,
-            onCloseDialog = { launchDialog = false },
+            onCloseDialog = { dialogIsActive = false },
             onChangedData = { newValue -> onChangedNumber(newValue)
-                launchDialog = false
+                dialogIsActive = false
             }
         )
     }
@@ -217,13 +189,16 @@ fun BoxLabDescription(description: String) {
             .height(DESCRIPTION_BOX_HEIGHT)
             .width(DESCRIPTION_BOX_WIDTH)
             .background(
-                color = BOX_COLOR,
+                color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(CORNER_DEGREE)
             ),
         contentAlignment = Alignment.Center
     ) {
         Row {
-            Text(description)
+            Text(
+                description,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 
@@ -246,7 +221,7 @@ fun StepsStatuses(
             OneStepBox(
                 status1,
                 changeStatus = {
-                    st -> onStatusChange(1, st)
+                    newStatus -> onStatusChange(1, newStatus)
                 }
             )
         }
@@ -254,7 +229,7 @@ fun StepsStatuses(
             OneStepBox(
                 status2,
                 changeStatus = {
-                    st -> onStatusChange(2, st)
+                    newStatus -> onStatusChange(2, newStatus)
                 }
             )
         }
@@ -262,7 +237,7 @@ fun StepsStatuses(
             OneStepBox(
                 status3,
                 changeStatus = {
-                    st -> onStatusChange(3, st)
+                    newStatus -> onStatusChange(3, newStatus)
                 }
             )
         }
@@ -270,7 +245,7 @@ fun StepsStatuses(
             OneStepBox(
                 status4,
                 changeStatus = {
-                    st -> onStatusChange(4, st)
+                    newStatus -> onStatusChange(4, newStatus)
                 }
             )
         }
@@ -287,8 +262,8 @@ fun OneStepBox(status: Int, changeStatus: (Int) -> Unit) {
             .height(DEFAULT_BOX_HEIGHT)
             .width(DEFAULT_BOX_WIDTH)
             .background(
-                color = BOX_COLOR,
-                shape = RoundedCornerShape(CORNER_DEGREE)
+                shape = RoundedCornerShape(CORNER_DEGREE),
+                color = MaterialTheme.colorScheme.primary
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -298,7 +273,9 @@ fun OneStepBox(status: Int, changeStatus: (Int) -> Unit) {
                 onClick = {
                     changeStatus(if (status == NOT_DONE) DONE else NOT_DONE)
                 }
-            )
+            ),
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 26.sp
         )
     }
 }
@@ -318,13 +295,11 @@ fun DefaultDialogWindow(
         onCloseDialog
     ) {
 
-        Card(
-            modifier = Modifier.fillMaxWidth(0.8f).fillMaxHeight(0.2f)
-        ) {
+        Card {
 
             Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
                 Text(stringInHead)
@@ -347,4 +322,44 @@ fun DefaultDialogWindow(
 
     }
 
+}
+
+@Composable
+fun GradeBox(status: Int) {
+    Box(
+        modifier = Modifier
+            .height(DEFAULT_BOX_HEIGHT)
+            .width(DEFAULT_BOX_WIDTH)
+            .background(
+                shape = RoundedCornerShape(CORNER_DEGREE),
+                color = MaterialTheme.colorScheme.primary
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            whatToShowInGrade(status),
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 26.sp
+        )
+    }
+}
+
+@Composable
+fun ResultBox(status: Boolean) {
+    Box(
+        modifier = Modifier
+            .height(DEFAULT_BOX_HEIGHT)
+            .width(DEFAULT_BOX_WIDTH)
+            .background(
+                shape = RoundedCornerShape(CORNER_DEGREE),
+                color = MaterialTheme.colorScheme.primary
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = whatToShowInResult(status),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
 }

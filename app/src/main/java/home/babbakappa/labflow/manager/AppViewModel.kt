@@ -119,4 +119,12 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         }
     }
 
+    fun deleteSubject(subjectName: String) {
+
+        viewModelScope.launch {
+            db.deleteSubject(subjectName)
+        }
+
+    }
+
 }

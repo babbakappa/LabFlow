@@ -24,9 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import home.babbakappa.labflow.manager.AppViewModel
 import home.babbakappa.labflow.manager.UIState
-import home.babbakappa.labflow.tools.EMPTY_COLOR
-import home.babbakappa.labflow.tools.HEAD_COLOR
-import home.babbakappa.labflow.tools.TEXT_COLOR_WHITE
 
 @Composable
 fun MainHub(vm: AppViewModel) {
@@ -55,6 +52,9 @@ fun MainHub(vm: AppViewModel) {
                 },
                 onClickBack = {
                     vm.changeUIState(UIState.START_SCREEN)
+                },
+                onDeleteSubject = {name ->
+                    vm.deleteSubject(name)
                 }
             )
         }
@@ -63,9 +63,9 @@ fun MainHub(vm: AppViewModel) {
             SubjectScreen(tasks,
                 currentName,
                 onClickBack = {
-                    vm.changeUIState(UIState.START_SCREEN)
+                    vm.changeUIState(UIState.SELECT_SCREEN)
                 },
-                onStatusChange = {num, st, id -> vm.changeStatusByItsNumber(num, st, id)},
+                onChangedStatus = {statusNumber, newStatus, id -> vm.changeStatusByItsNumber(statusNumber, newStatus, id)},
                 onChangedNumber = { newNumber, id -> vm.changeNumber(newNumber, id) }
             )
         }
@@ -88,23 +88,17 @@ fun MainHub(vm: AppViewModel) {
 fun DefaultScreenHead(stringInHead: String, arrowBackAction: () -> Unit) {
 
     Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f).background(color = HEAD_COLOR)
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             IconButton(
-                onClick = arrowBackAction,
-                colors = IconButtonColors(
-                    containerColor = EMPTY_COLOR,
-                    contentColor = TEXT_COLOR_WHITE,
-                    disabledContainerColor = EMPTY_COLOR,
-                    disabledContentColor = TEXT_COLOR_WHITE
-                )
+                onClick = arrowBackAction
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -116,8 +110,7 @@ fun DefaultScreenHead(stringInHead: String, arrowBackAction: () -> Unit) {
                 stringInHead,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                color = TEXT_COLOR_WHITE
+                modifier = Modifier.weight(1f)
             )
 
         }

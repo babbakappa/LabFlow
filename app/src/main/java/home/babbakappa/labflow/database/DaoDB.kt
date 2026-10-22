@@ -45,4 +45,7 @@ interface DatabaseDAO {
     @Query("UPDATE tasks SET lab_number = :newNumber WHERE id == :id")
     suspend fun changeLabNumber(newNumber: String, id: Long)
 
+    @Query("DELETE FROM tasks WHERE subject_name = :subjectName")
+    suspend fun deleteSubject(subjectName: String)
+
 }
