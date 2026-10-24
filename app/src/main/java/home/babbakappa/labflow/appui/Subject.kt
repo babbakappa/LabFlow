@@ -22,9 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +36,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,10 +69,25 @@ fun SubjectScreen(
     subjectName: String,
     onClickBack: () -> Unit,
     onChangedStatus: (Int, Int, Long) -> Unit,
-    onChangedNumber: (String, Long) -> Unit
+    onChangedNumber: (String, Long) -> Unit,
+    onChangedDescription: (String, Long) -> Unit,
+    onChangedGrade: (Int, Long) -> Unit,
+    doneCount: Int,
+    onChangedResult: (Boolean, Long) -> Unit
 ) {
 
     val scrollStateHorizontal = rememberScrollState()
+    val percentage by remember(doneCount, currentTasks.size) {
+        derivedStateOf {
+            if (currentTasks.isEmpty()) {
+                0 // Если задач нет — 0%
+            } else {
+                // Умножаем на 100 и округляем до целого числа
+                ((doneCount.toFloat() / currentTasks.size) * 100).toInt()
+            }
+        }
+    }
+
 
     Surface(
         modifier = Modifier
@@ -96,11 +117,25 @@ fun SubjectScreen(
                         OneLine(
                             task,
                             onChangedStatus = { statusNumber, newState, id -> onChangedStatus(statusNumber, newState, id) },
-                            onChangedNumber = { newNumber, id -> onChangedNumber(newNumber, id) }
+                            onChangedNumber = { newNumber, id -> onChangedNumber(newNumber, id) },
+                            onChangedDescription = {newValue, id -> onChangedDescription(newValue, id) },
+                            onChangedGrade = {newGrade, id -> onChangedGrade(newGrade, id)},
+                            onChangedResult = {newValue, id -> onChangedResult(newValue, id)}
                         )
                     }
                 }
 
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Процент выполнения: $percentage%",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
         }
@@ -112,7 +147,10 @@ fun SubjectScreen(
 fun OneLine(
     task: TaskEntity,
     onChangedStatus: (Int, Int, Long) -> Unit,
-    onChangedNumber: (String, Long) -> Unit
+    onChangedNumber: (String, Long) -> Unit,
+    onChangedDescription: (String, Long) -> Unit,
+    onChangedGrade: (Int, Long) -> Unit,
+    onChangedResult: (Boolean, Long) -> Unit
 ) {
 
     Row(
@@ -121,9 +159,14 @@ fun OneLine(
 
         BoxLabNumber(
             task.labNumber,
-            {newValue -> onChangedNumber(newValue, task.id) }
+            onChangedNumber = {
+                newValue -> onChangedNumber(newValue, task.id)
+            }
         )
-        BoxLabDescription(task.labTopic)
+        BoxLabDescription(
+            task.labTopic,
+            onChangedDescription = { newValue -> onChangedDescription(newValue, task.id) }
+        )
         StepsStatuses(
             task.status1,
             task.status2,
@@ -131,8 +174,16 @@ fun OneLine(
             task.status4,
             onStatusChange = { num, st -> onChangedStatus(num, st, task.id) }
         )
-        GradeBox(task.grade)
-        ResultBox(task.done)
+        GradeBox(
+            task.grade,
+            onChangedGrade = {
+                newGrade -> onChangedGrade(newGrade, task.id)
+            }
+        )
+        ResultBox(
+            task.done,
+            onValueChange = {newValue -> onChangedResult(newValue, task.id)}
+        )
 
     }
 
@@ -182,7 +233,13 @@ fun BoxLabNumber(
 }
 
 @Composable
-fun BoxLabDescription(description: String) {
+fun BoxLabDescription(
+    description: String,
+    onChangedDescription: (String) -> Unit
+) {
+
+    var dialogIsActive by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = Modifier
@@ -191,15 +248,35 @@ fun BoxLabDescription(description: String) {
             .background(
                 color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(CORNER_DEGREE)
+            )
+            .clickable(
+                onClick = { dialogIsActive = !dialogIsActive }
             ),
         contentAlignment = Alignment.Center
     ) {
-        Row {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .verticalScroll(scrollState),
+
+        ) {
             Text(
                 description,
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
+    }
+
+    if (dialogIsActive) {
+        DefaultDialogWindow(
+            "Тема лабораторной",
+            "Тема",
+            description,
+            onCloseDialog = { dialogIsActive = false },
+            onChangedData = { newValue -> onChangedDescription(newValue)
+                dialogIsActive = false
+            }
+        )
     }
 
 }
@@ -275,7 +352,7 @@ fun OneStepBox(status: Int, changeStatus: (Int) -> Unit) {
                 }
             ),
             color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 26.sp
+            fontSize = 34.sp
         )
     }
 }
@@ -324,8 +401,132 @@ fun DefaultDialogWindow(
 
 }
 
+
 @Composable
-fun GradeBox(status: Int) {
+fun DialogWindowForGrade(
+    stringInHead: String,
+    stringInField: String,
+    stringFromBox: String,
+    onCloseDialog: () -> Unit,
+    onChangedData: (Int) -> Unit
+) {
+
+    var rememberedValue by remember { mutableStateOf(stringFromBox) }
+    var menuIsOpen by remember { mutableStateOf(false) }
+
+    Dialog(
+        onCloseDialog
+    ) {
+
+        Card {
+
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                Text(stringInHead)
+
+                Column() {
+
+                    OutlinedTextField(
+                        value = rememberedValue,
+                        onValueChange = { newValue ->
+                            rememberedValue = newValue
+                        },
+                        label = { Text(stringInField) },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = { menuIsOpen = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+
+                    DropdownMenu(
+                        onDismissRequest = { menuIsOpen = false },
+                        expanded = menuIsOpen
+                    ) {
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "0"
+                                menuIsOpen = false
+                            },
+                            text = {Text("Незачет")}
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "1"
+                                menuIsOpen = false
+                            },
+                            text = {Text("Зачет")}
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "2"
+                                menuIsOpen = false
+                            },
+                            text = {Text("2")}
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "3"
+                                menuIsOpen = false
+                            },
+                            text = {Text("3")}
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "4"
+                                menuIsOpen = false
+                            },
+                            text = {Text("4")}
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                rememberedValue = "5"
+                                menuIsOpen = false
+                            },
+                            text = {Text("5")}
+                        )
+
+                    }
+
+                }
+
+                Button(
+                    onClick = { onChangedData(rememberedValue.toInt()) }
+                ) {
+                    Text("Изменить")
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+
+@Composable
+fun GradeBox(
+    status: Int,
+    onChangedGrade: (Int) -> Unit
+) {
+    var dialogIsActive by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .height(DEFAULT_BOX_HEIGHT)
@@ -333,7 +534,8 @@ fun GradeBox(status: Int) {
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
                 color = MaterialTheme.colorScheme.primary
-            ),
+            )
+            .clickable(onClick = { dialogIsActive = true }),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -342,10 +544,25 @@ fun GradeBox(status: Int) {
             fontSize = 26.sp
         )
     }
+
+    if (dialogIsActive) {
+        DialogWindowForGrade(
+            "Оценка лабораторной",
+            "Оценка",
+            status.toString(),
+            onCloseDialog = { dialogIsActive = false },
+            onChangedData = { newValue -> onChangedGrade(newValue)
+                dialogIsActive = false
+            }
+        )
+    }
 }
 
 @Composable
-fun ResultBox(status: Boolean) {
+fun ResultBox(
+    status: Boolean,
+    onValueChange: (Boolean) -> Unit
+) {
     Box(
         modifier = Modifier
             .height(DEFAULT_BOX_HEIGHT)
@@ -353,6 +570,9 @@ fun ResultBox(status: Boolean) {
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
                 color = MaterialTheme.colorScheme.primary
+            )
+            .clickable(
+                onClick = { onValueChange(!status) }
             ),
         contentAlignment = Alignment.Center
     ) {

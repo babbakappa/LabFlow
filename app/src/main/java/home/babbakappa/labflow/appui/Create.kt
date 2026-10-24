@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.text.isDigitsOnly
 import home.babbakappa.labflow.database.database.GRADES
 import home.babbakappa.labflow.database.database.PASSES
@@ -46,6 +48,8 @@ fun CreateTableScreen(
     onTakeData: (String, Int, Int, String) -> Unit,
     onClickBack: () -> Unit
 ) {
+
+    var warningWindowActive by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -63,9 +67,16 @@ fun CreateTableScreen(
                 onTakeData = {
                     subjectName, labCount, stepsCount, gradeMethod ->
                     onTakeData(subjectName, labCount, stepsCount, gradeMethod)
+                },
+                onShowWarning = {
+                    warningWindowActive = true
                 }
             )
 
+        }
+
+        if (warningWindowActive) {
+            CreateScreenWarningScreen(onWindowClose = {warningWindowActive = false})
         }
 
     }
@@ -74,12 +85,13 @@ fun CreateTableScreen(
 
 @Composable
 fun CreationForm(
-    onTakeData: (String, Int, Int, String) -> Unit
+    onTakeData: (String, Int, Int, String) -> Unit,
+    onShowWarning: () -> Unit
 ) {
 
     Box(modifier = Modifier
         .fillMaxWidth()
-        .fillMaxHeight(0.9f),
+        .fillMaxHeight(0.7f),
         contentAlignment = Alignment.Center
     ) {
 
@@ -87,7 +99,8 @@ fun CreationForm(
             onTakeData = {
                 subjectName, labCount, stepsCount, gradeMethod ->
                 onTakeData(subjectName, labCount, stepsCount, gradeMethod)
-            }
+            },
+            onShowWarning = onShowWarning
         )
 
     }
@@ -96,7 +109,8 @@ fun CreationForm(
 
 @Composable
 fun TextFields(
-    onTakeData: (String, Int, Int, String) -> Unit
+    onTakeData: (String, Int, Int, String) -> Unit,
+    onShowWarning: () -> Unit
 ) {
 
     var currentSubjectName by remember { mutableStateOf("") }
@@ -132,8 +146,13 @@ fun TextFields(
         OutlinedTextField(
             value = statusCount,
             onValueChange = {
-                if (it.isEmpty() || it.isDigitsOnly() || it.toInt() < 5) {
-                    statusCount = it
+                if (it.isEmpty() || it.isDigitsOnly()) {
+                    if (it.isNotEmpty() && it.toInt() > 4) {
+                        statusCount = "4"
+                    }
+                    else {
+                        statusCount = it
+                    }
                 }
             },
             label = { Text("Количество этапов (не более 4)") },
@@ -198,15 +217,60 @@ fun TextFields(
 
         Button(
             onClick = {
-                onTakeData(
-                    currentSubjectName,
-                    labCount.toInt(),
-                    statusCount.toInt(),
-                    selectedOption
-                )
+                if (
+                    currentSubjectName.isEmpty()
+                    || labCount.isEmpty()
+                    || statusCount.isEmpty()
+                    || selectedOption.isEmpty()
+                    )
+                {
+                    onShowWarning()
+                }
+                else {
+
+                    onTakeData(
+                        currentSubjectName,
+                        labCount.toInt(),
+                        statusCount.toInt(),
+                        selectedOption
+                    )
+
+                }
             }
         ) {
             Text("Создать")
+        }
+
+    }
+
+}
+
+@Composable
+fun CreateScreenWarningScreen(
+    onWindowClose: () -> Unit
+) {
+
+    Dialog(
+        onWindowClose
+    ) {
+
+        Card {
+
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                Text("Предупреждение")
+                Text("Не все поля заполнены!")
+                Button(
+                    onClick = { onWindowClose() }
+                ) {
+                    Text("Ок")
+                }
+
+            }
+
         }
 
     }

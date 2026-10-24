@@ -15,8 +15,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -42,6 +45,14 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    val countOfDoneLabsByCurrentSubject: StateFlow<Int> = currentTasks
+        .map { tasks -> tasks.count { it.done } } // Просто считаем таски, у которых done == true
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
 
     fun changeUIState(newUIState: UIState) {
         _uiState.value = newUIState
@@ -125,6 +136,24 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
             db.deleteSubject(subjectName)
         }
 
+    }
+
+    fun changeDescription(newDescription: String, id: Long) {
+        viewModelScope.launch {
+            db.changeLabDescription(newDescription, id)
+        }
+    }
+
+    fun changeGrade(newGrade: Int, id: Long) {
+        viewModelScope.launch {
+            db.changeGrade(newGrade, id)
+        }
+    }
+
+    fun changeResult(newValue: Boolean, id: Long) {
+        viewModelScope.launch {
+            db.changeResult(newValue, id)
+        }
     }
 
 }

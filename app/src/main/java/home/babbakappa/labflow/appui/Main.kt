@@ -32,6 +32,7 @@ fun MainHub(vm: AppViewModel) {
     val uiState by vm.uiState.collectAsState()
     val currentName by vm.currentSubject.collectAsState()
     val names by vm.allSubjectNames.collectAsState()
+    val currentCount by vm.countOfDoneLabsByCurrentSubject.collectAsState()
 
     when (uiState) {
         UIState.START_SCREEN -> StartScreen(
@@ -66,7 +67,11 @@ fun MainHub(vm: AppViewModel) {
                     vm.changeUIState(UIState.SELECT_SCREEN)
                 },
                 onChangedStatus = {statusNumber, newStatus, id -> vm.changeStatusByItsNumber(statusNumber, newStatus, id)},
-                onChangedNumber = { newNumber, id -> vm.changeNumber(newNumber, id) }
+                onChangedNumber = { newNumber, id -> vm.changeNumber(newNumber, id) },
+                onChangedDescription = {newValue, id -> vm.changeDescription(newValue, id)},
+                onChangedGrade = {newGrade, id -> vm.changeGrade(newGrade, id)},
+                currentCount,
+                onChangedResult = {newValue, id -> vm.changeResult(newValue, id)}
             )
         }
 
