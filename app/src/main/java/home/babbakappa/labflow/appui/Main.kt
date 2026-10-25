@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,8 @@ fun MainHub(vm: AppViewModel) {
     val currentName by vm.currentSubject.collectAsState()
     val names by vm.allSubjectNames.collectAsState()
     val currentCount by vm.countOfDoneLabsByCurrentSubject.collectAsState()
+    val currentHeaders by vm.currentHeaders.collectAsState()
+    val context = LocalContext.current
 
     when (uiState) {
         UIState.START_SCREEN -> StartScreen(
@@ -48,7 +51,7 @@ fun MainHub(vm: AppViewModel) {
             SelectScreen(
                 names,
                 onClickItem = { newName ->
-                    vm.changeCurrentSubject(newName)
+                    vm.changeCurrentSubject(context, newName)
                     vm.changeUIState(UIState.SUBJECT_SCREEN)
                 },
                 onClickBack = {
@@ -71,7 +74,11 @@ fun MainHub(vm: AppViewModel) {
                 onChangedDescription = {newValue, id -> vm.changeDescription(newValue, id)},
                 onChangedGrade = {newGrade, id -> vm.changeGrade(newGrade, id)},
                 currentCount,
-                onChangedResult = {newValue, id -> vm.changeResult(newValue, id)}
+                onChangedResult = {newValue, id -> vm.changeResult(newValue, id)},
+                currentHeaders,
+                onChangeHeaders = {
+                    newList -> vm.changeSubjectHeaders(newList)
+                }
             )
         }
 

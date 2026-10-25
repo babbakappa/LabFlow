@@ -45,11 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import home.babbakappa.labflow.database.database.DONE
+import home.babbakappa.labflow.database.database.NOT_ACTIVE
 import home.babbakappa.labflow.database.database.NOT_DONE
 import home.babbakappa.labflow.database.database.TaskEntity
 import home.babbakappa.labflow.tools.verifyToPlaceStepInUI
@@ -73,7 +75,9 @@ fun SubjectScreen(
     onChangedDescription: (String, Long) -> Unit,
     onChangedGrade: (Int, Long) -> Unit,
     doneCount: Int,
-    onChangedResult: (Boolean, Long) -> Unit
+    onChangedResult: (Boolean, Long) -> Unit,
+    currentHeaders: List<String>,
+    onChangeHeaders: (List<String>) -> Unit
 ) {
 
     val scrollStateHorizontal = rememberScrollState()
@@ -104,32 +108,48 @@ fun SubjectScreen(
             )
 
             Row(
-
-                modifier = Modifier.horizontalScroll(scrollStateHorizontal)
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.9f)
+                    .horizontalScroll(scrollStateHorizontal)
+                    .padding(horizontal = 16.dp)
             ) {
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxHeight(0.8f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(currentTasks) {
-                            task ->
-                        OneLine(
-                            task,
-                            onChangedStatus = { statusNumber, newState, id -> onChangedStatus(statusNumber, newState, id) },
-                            onChangedNumber = { newNumber, id -> onChangedNumber(newNumber, id) },
-                            onChangedDescription = {newValue, id -> onChangedDescription(newValue, id) },
-                            onChangedGrade = {newGrade, id -> onChangedGrade(newGrade, id)},
-                            onChangedResult = {newValue, id -> onChangedResult(newValue, id)}
+                Column(modifier = Modifier.fillMaxHeight()) {
+                    // Шапка таблицы
+                    currentTasks.firstOrNull()?.let { firstTask ->
+                        ThingAboveOneLine(
+                            task = firstTask,
+                            currentHeaders = currentHeaders,
+                            onChangedHeaders = { newList -> onChangeHeaders(newList) }
                         )
                     }
-                }
 
+                    // Отступ между шапкой и контентом таблицы
+                    Box(modifier = Modifier.height(8.dp))
+
+                    // Строки таблицы
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(currentTasks) { task ->
+                            OneLine(
+                                task,
+                                onChangedStatus = onChangedStatus,
+                                onChangedNumber = onChangedNumber,
+                                onChangedDescription = onChangedDescription,
+                                onChangedGrade = onChangedGrade,
+                                onChangedResult = onChangedResult
+                            )
+                        }
+                    }
+
+                }
             }
 
             Row(
                 horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Top,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -143,6 +163,162 @@ fun SubjectScreen(
 
     }
 }
+
+
+@Composable
+fun ThingAboveOneLine(
+    task: TaskEntity,
+    currentHeaders: List<String>,
+    onChangedHeaders: (List<String>) -> Unit,
+) {
+
+    val headers by remember(currentHeaders) {
+        derivedStateOf {
+            val list = currentHeaders.toMutableList()
+            while (list.size < 4) {
+                list.add("Шаг ${list.size + 1}")
+            }
+            list
+        }
+    }
+    var firstDialogIsOpen by remember { mutableStateOf(false) }
+    var secondDialogIsOpen by remember { mutableStateOf(false) }
+    var thirdDialogIsOpen by remember { mutableStateOf(false) }
+    var fourthDialogIsOpen by remember { mutableStateOf(false) }
+
+    Row(
+        // Используем точно такой же шаг Arrangement, как и в функции OneLine!
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Каждому элементу шапки задаем модификатор .width() равный ширине бокса под ним
+        Text(
+            text = "№",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
+            // Центрируем текст внутри выделенной ширины
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = "Тема",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(DESCRIPTION_BOX_WIDTH),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = headers[0],
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .width(DEFAULT_BOX_WIDTH)
+                .clickable { firstDialogIsOpen = true },
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        if (task.status2 != NOT_ACTIVE) {
+            Text(
+                text = headers[1],
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .width(DEFAULT_BOX_WIDTH)
+                    .clickable { secondDialogIsOpen = true },
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+        if (task.status3 != NOT_ACTIVE) {
+
+            Text(
+                text = headers[2],
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .width(DEFAULT_BOX_WIDTH)
+                    .clickable { thirdDialogIsOpen = true },
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+        }
+        if (task.status4 != NOT_ACTIVE)  {
+            Text(
+                text = headers[3],
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .width(DEFAULT_BOX_WIDTH)
+                    .clickable { fourthDialogIsOpen = true },
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+
+        Text(
+            text = "Оценка",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = "Результат",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+
+    if (firstDialogIsOpen) {
+        DefaultDialogWindow(
+            "Первый шаг",
+            "Название",
+            headers[0],
+            onCloseDialog = {firstDialogIsOpen = false},
+            onChangedData = {
+                newValue -> headers[0] = newValue
+                onChangedHeaders(headers.toList())
+
+                firstDialogIsOpen = false
+            }
+        )
+    }
+
+    if (secondDialogIsOpen) {
+        DefaultDialogWindow(
+            "Первый шаг",
+            "Название",
+            headers[1],
+            onCloseDialog = {secondDialogIsOpen = false},
+            onChangedData = {
+                    newValue -> headers[1] = newValue
+                onChangedHeaders(headers.toList())
+                secondDialogIsOpen = false
+            }
+        )
+    }
+
+    if (thirdDialogIsOpen) {
+        DefaultDialogWindow(
+            "Первый шаг",
+            "Название",
+            headers[2],
+            onCloseDialog = {thirdDialogIsOpen = false},
+            onChangedData = {
+                    newValue -> headers[2] = newValue
+                onChangedHeaders(headers.toList())
+                thirdDialogIsOpen = false
+            }
+        )
+    }
+
+    if (fourthDialogIsOpen) {
+        DefaultDialogWindow(
+            "Первый шаг",
+            "Название",
+            headers[3],
+            onCloseDialog = {fourthDialogIsOpen = false},
+            onChangedData = {
+                    newValue -> headers[3] = newValue
+                onChangedHeaders(headers.toList())
+                fourthDialogIsOpen = false
+            }
+        )
+    }
+
+}
+
 
 @Composable
 fun OneLine(

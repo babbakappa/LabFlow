@@ -1,7 +1,9 @@
 package home.babbakappa.labflow.manager
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import home.babbakappa.labflow.database.database.DatabaseDAO
@@ -11,6 +13,8 @@ import home.babbakappa.labflow.database.database.NOT_DONE
 import home.babbakappa.labflow.database.database.NO_GRADE
 import home.babbakappa.labflow.database.database.NO_PASS
 import home.babbakappa.labflow.database.database.TaskEntity
+import home.babbakappa.labflow.tools.readHeadersForSubject
+import home.babbakappa.labflow.tools.writeHeadersForSubject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +29,7 @@ import kotlinx.coroutines.launch
 
 class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
 
+    private var appContext: Context? = null
 
     private val _uiState = MutableStateFlow(UIState.START_SCREEN)
     val uiState = _uiState.asStateFlow()
@@ -46,6 +51,37 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         initialValue = emptyList()
     )
 
+    // 1. Создаем скрытый триггер для ручного обновления заголовков
+    private val _headersTrigger = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentHeaders: StateFlow<List<String>> = kotlinx.coroutines.flow.combine(
+        _currentSubject,
+        _headersTrigger
+    ) { subject, _ ->
+        val context = appContext
+        if (context != null && subject.isNotEmpty()) {
+            readHeadersForSubject(context, subject)
+        } else {
+            listOf("Шаг 1", "Шаг 2", "Шаг 3", "Шаг 4")
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = listOf("Шаг 1", "Шаг 2", "Шаг 3", "Шаг 4")
+    )
+
+    fun changeSubjectHeaders(headers: List<String>) {
+        viewModelScope.launch {
+            val context = appContext ?: return@launch
+            writeHeadersForSubject(context, _currentSubject.value, headers)
+
+            // 2. Пинаем триггер, чтобы combine выше перечитал файл прямо сейчас!
+            _headersTrigger.value += 1
+        }
+    }
+
+
     val countOfDoneLabsByCurrentSubject: StateFlow<Int> = currentTasks
         .map { tasks -> tasks.count { it.done } } // Просто считаем таски, у которых done == true
         .stateIn(
@@ -58,7 +94,8 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
         _uiState.value = newUIState
     }
 
-    fun changeCurrentSubject(newSubject: String) {
+    fun changeCurrentSubject(context: Context, newSubject: String) {
+        appContext = context.applicationContext // Сохраняем безопасный applicationContext
         _currentSubject.value = newSubject
     }
 
