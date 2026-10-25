@@ -68,6 +68,8 @@ val DESCRIPTION_BOX_WIDTH = 64.dp * 5f
 val CORNER_DEGREE = 6.dp
 val BOX_BORDER_WIDTH = 2.dp
 
+val RESULT_BOX_WIDTH = (64 + 24).dp
+
 @Composable
 fun SubjectScreen(
     currentTasks: List<TaskEntity>,
@@ -150,21 +152,35 @@ fun SubjectScreen(
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Процент выполнения: $percentage%",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            ThingUnderTheTable(percentage)
 
         }
 
     }
+}
+
+
+@Composable
+fun ThingUnderTheTable(
+    percentage: Int
+) {
+
+    Box() {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = "Процент выполнения: $percentage%",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+    }
+
+
 }
 
 
@@ -195,72 +211,150 @@ fun ThingAboveOneLine(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Каждому элементу шапки задаем модификатор .width() равный ширине бокса под ним
-        Text(
-            text = "№",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
-            // Центрируем текст внутри выделенной ширины
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        Text(
-            text = "Тема",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(DESCRIPTION_BOX_WIDTH),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        Text(
-            text = headers[0],
-            fontWeight = FontWeight.Bold,
+        Box(
             modifier = Modifier
                 .width(DEFAULT_BOX_WIDTH)
-                .clickable { firstDialogIsOpen = true },
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        if (task.status2 != NOT_ACTIVE) {
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(CORNER_DEGREE)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = headers[1],
+                text = "№",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(CORNER_DEGREE)
+                )
+                .width(DESCRIPTION_BOX_WIDTH),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Тема",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .width(DEFAULT_BOX_WIDTH)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(CORNER_DEGREE)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = headers[0],
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .width(DEFAULT_BOX_WIDTH)
-                    .clickable { secondDialogIsOpen = true },
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    .clickable { firstDialogIsOpen = true },
+                color = MaterialTheme.colorScheme.onPrimary
             )
+        }
+
+        if (task.status2 != NOT_ACTIVE) {
+
+            Box(
+                modifier = Modifier
+                    .width(DEFAULT_BOX_WIDTH)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(CORNER_DEGREE)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = headers[1],
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { secondDialogIsOpen = true },
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
         if (task.status3 != NOT_ACTIVE) {
 
-            Text(
-                text = headers[2],
-                fontWeight = FontWeight.Bold,
+            Box(
                 modifier = Modifier
                     .width(DEFAULT_BOX_WIDTH)
-                    .clickable { thirdDialogIsOpen = true },
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(CORNER_DEGREE)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = headers[2],
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { thirdDialogIsOpen = true },
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+
 
         }
         if (task.status4 != NOT_ACTIVE)  {
-            Text(
-                text = headers[3],
-                fontWeight = FontWeight.Bold,
+
+            Box(
                 modifier = Modifier
                     .width(DEFAULT_BOX_WIDTH)
-                    .clickable { fourthDialogIsOpen = true },
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(CORNER_DEGREE)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = headers[3],
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { fourthDialogIsOpen = true },
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .width(DEFAULT_BOX_WIDTH)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(CORNER_DEGREE)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Оценка",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
-        Text(
-            text = "Оценка",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        Text(
-            text = "Результат",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(DEFAULT_BOX_WIDTH),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+        Box(
+            modifier = Modifier
+                .width(RESULT_BOX_WIDTH)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(CORNER_DEGREE)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Результат",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 
     if (firstDialogIsOpen) {
@@ -778,7 +872,7 @@ fun ResultBox(
     Box(
         modifier = Modifier
             .height(DEFAULT_BOX_HEIGHT)
-            .width(DEFAULT_BOX_WIDTH)
+            .width(RESULT_BOX_WIDTH)
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
                 color = MaterialTheme.colorScheme.onPrimary
