@@ -110,6 +110,7 @@ fun SubjectScreen(
             ) {
 
                 LazyColumn(
+                    modifier = Modifier.fillMaxHeight(0.8f),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(currentTasks) {
