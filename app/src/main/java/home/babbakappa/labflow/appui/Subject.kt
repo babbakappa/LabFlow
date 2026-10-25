@@ -1,6 +1,7 @@
 package home.babbakappa.labflow.appui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -64,6 +65,7 @@ val DEFAULT_BOX_WIDTH = 64.dp
 val DESCRIPTION_BOX_HEIGHT = 64.dp
 val DESCRIPTION_BOX_WIDTH = 64.dp * 5f
 val CORNER_DEGREE = 6.dp
+val BOX_BORDER_WIDTH = 2.dp
 
 @Composable
 fun SubjectScreen(
@@ -379,19 +381,24 @@ fun BoxLabNumber(
             .height(DEFAULT_BOX_HEIGHT)
             .width(DEFAULT_BOX_WIDTH)
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(CORNER_DEGREE)
             )
             .clickable(
                 onClick = {
                     dialogIsActive = !dialogIsActive
                 }
+            )
+            .border(
+                width = BOX_BORDER_WIDTH,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(CORNER_DEGREE)
             ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             number,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 26.sp
         )
     }
@@ -423,11 +430,16 @@ fun BoxLabDescription(
             .height(DESCRIPTION_BOX_HEIGHT)
             .width(DESCRIPTION_BOX_WIDTH)
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(CORNER_DEGREE)
             )
             .clickable(
                 onClick = { dialogIsActive = !dialogIsActive }
+            )
+            .border(
+                width = BOX_BORDER_WIDTH,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(CORNER_DEGREE)
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -439,7 +451,7 @@ fun BoxLabDescription(
         ) {
             Text(
                 description,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -517,7 +529,12 @@ fun OneStepBox(status: Int, changeStatus: (Int) -> Unit) {
             .width(DEFAULT_BOX_WIDTH)
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            .border(
+                width = BOX_BORDER_WIDTH,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(CORNER_DEGREE)
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -528,7 +545,7 @@ fun OneStepBox(status: Int, changeStatus: (Int) -> Unit) {
                     changeStatus(if (status == NOT_DONE) DONE else NOT_DONE)
                 }
             ),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 34.sp
         )
     }
@@ -710,14 +727,19 @@ fun GradeBox(
             .width(DEFAULT_BOX_WIDTH)
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimary
             )
-            .clickable(onClick = { dialogIsActive = true }),
+            .clickable(onClick = { dialogIsActive = true })
+            .border(
+                width = BOX_BORDER_WIDTH,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(CORNER_DEGREE)
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             whatToShowInGrade(status),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 26.sp
         )
     }
@@ -746,17 +768,22 @@ fun ResultBox(
             .width(DEFAULT_BOX_WIDTH)
             .background(
                 shape = RoundedCornerShape(CORNER_DEGREE),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimary
             )
             .clickable(
                 onClick = { onValueChange(!status) }
+            )
+            .border(
+                width = BOX_BORDER_WIDTH,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(CORNER_DEGREE)
             ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = whatToShowInResult(status),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimary
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }
