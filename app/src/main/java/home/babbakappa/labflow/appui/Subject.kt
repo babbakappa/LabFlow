@@ -169,7 +169,9 @@ fun ThingUnderTheTable(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             Text(
                 text = "Процент выполнения: $percentage%",
@@ -805,10 +807,17 @@ fun DialogWindowForGrade(
 
                 }
 
-                Button(
-                    onClick = { onChangedData(rememberedValue.toInt()) }
-                ) {
-                    Text("Изменить")
+                Row() {
+                    Button(
+                        onClick = { onChangedData(rememberedValue.toInt()) }
+                    ) {
+                        Text("Изменить")
+                    }
+                    TextButton(
+                        onClick = { onCloseDialog() }
+                    ) {
+                        Text("Отмена")
+                    }
                 }
 
             }
