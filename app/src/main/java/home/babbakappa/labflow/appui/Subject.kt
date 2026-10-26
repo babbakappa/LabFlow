@@ -374,7 +374,7 @@ fun ThingAboveOneLine(
 
     if (secondDialogIsOpen) {
         DefaultDialogWindow(
-            "Первый шаг",
+            "Второй шаг",
             "Название",
             headers[1],
             onCloseDialog = {secondDialogIsOpen = false},
@@ -388,7 +388,7 @@ fun ThingAboveOneLine(
 
     if (thirdDialogIsOpen) {
         DefaultDialogWindow(
-            "Первый шаг",
+            "Третий шаг",
             "Название",
             headers[2],
             onCloseDialog = {thirdDialogIsOpen = false},
@@ -402,7 +402,7 @@ fun ThingAboveOneLine(
 
     if (fourthDialogIsOpen) {
         DefaultDialogWindow(
-            "Первый шаг",
+            "Четвертый шаг",
             "Название",
             headers[3],
             onCloseDialog = {fourthDialogIsOpen = false},
