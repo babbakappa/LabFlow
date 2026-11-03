@@ -1,5 +1,13 @@
 package home.babbakappa.labflow.appui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,67 +45,93 @@ fun MainHub(vm: AppViewModel) {
     val currentHeaders by vm.currentHeaders.collectAsState()
     val context = LocalContext.current
 
-    when (uiState) {
-        UIState.START_SCREEN -> StartScreen(
-            onOpenSubjects = {
-                vm.changeUIState(UIState.SELECT_SCREEN)
-            },
-            onCreateSubject = {
-                vm.changeUIState(UIState.CREATE_SCREEN)
+    AnimatedContent(
+        targetState = uiState,
+        transitionSpec = {
+            // Новый экран заезжает справа налево (от fullWidth до 0)
+            val enterAnimation = slideInHorizontally(
+                animationSpec = tween(400),
+                initialOffsetX = { width -> width }
+            )
+
+            // Старый экран уезжает влево (от 0 до -fullWidth)
+            val exitAnimation = slideOutHorizontally(
+                animationSpec = tween(400),
+                targetOffsetX = { width -> -width }
+            )
+
+            enterAnimation togetherWith exitAnimation
+        },
+        label = "ScreenTransition"
+    ) { targetUiState ->
+
+        when (targetUiState) {
+            UIState.START_SCREEN -> StartScreen(
+                onOpenSubjects = {
+                    vm.changeUIState(UIState.SELECT_SCREEN)
+                },
+                onCreateSubject = {
+                    vm.changeUIState(UIState.CREATE_SCREEN)
+                }
+            )
+
+            UIState.SELECT_SCREEN -> {
+                SelectScreen(
+                    names,
+                    onClickItem = { newName ->
+                        vm.changeCurrentSubject(context, newName)
+                        vm.changeUIState(UIState.SUBJECT_SCREEN)
+                    },
+                    onClickBack = {
+                        vm.changeUIState(UIState.START_SCREEN)
+                    },
+                    onDeleteSubject = {name ->
+                        vm.deleteSubject(name)
+                    }
+                )
             }
-        )
 
-        UIState.SELECT_SCREEN -> {
-            SelectScreen(
-                names,
-                onClickItem = { newName ->
-                    vm.changeCurrentSubject(context, newName)
-                    vm.changeUIState(UIState.SUBJECT_SCREEN)
-                },
-                onClickBack = {
-                    vm.changeUIState(UIState.START_SCREEN)
-                },
-                onDeleteSubject = {name ->
-                    vm.deleteSubject(name)
-                }
-            )
+            UIState.SUBJECT_SCREEN -> {
+                SubjectScreen(tasks,
+                    currentName,
+                    onClickBack = {
+                        vm.changeUIState(UIState.SELECT_SCREEN)
+                    },
+                    onChangedStatus = {statusNumber, newStatus, id -> vm.changeStatusByItsNumber(statusNumber, newStatus, id)},
+                    onChangedNumber = { newNumber, id -> vm.changeNumber(newNumber, id) },
+                    onChangedDescription = {newValue, id -> vm.changeDescription(newValue, id)},
+                    onChangedGrade = {newGrade, id -> vm.changeGrade(newGrade, id)},
+                    currentCount,
+                    onChangedResult = {newValue, id -> vm.changeResult(newValue, id)},
+                    currentHeaders,
+                    onChangeHeaders = {
+                            newList -> vm.changeSubjectHeaders(newList)
+                    }
+                )
+            }
+
+            UIState.CREATE_SCREEN -> {
+                CreateTableScreen(
+                    onTakeData = {
+                            subjectName, labCount, stepsCount, gradeMethod ->
+                        vm.createNewSubject(subjectName, labCount, stepsCount, gradeMethod)
+                        vm.changeUIState(UIState.SELECT_SCREEN)
+                    },
+                    onClickBack = { vm.changeUIState(UIState.START_SCREEN) }
+                )
+            }
         }
 
-        UIState.SUBJECT_SCREEN -> {
-            SubjectScreen(tasks,
-                currentName,
-                onClickBack = {
-                    vm.changeUIState(UIState.SELECT_SCREEN)
-                },
-                onChangedStatus = {statusNumber, newStatus, id -> vm.changeStatusByItsNumber(statusNumber, newStatus, id)},
-                onChangedNumber = { newNumber, id -> vm.changeNumber(newNumber, id) },
-                onChangedDescription = {newValue, id -> vm.changeDescription(newValue, id)},
-                onChangedGrade = {newGrade, id -> vm.changeGrade(newGrade, id)},
-                currentCount,
-                onChangedResult = {newValue, id -> vm.changeResult(newValue, id)},
-                currentHeaders,
-                onChangeHeaders = {
-                    newList -> vm.changeSubjectHeaders(newList)
-                }
-            )
-        }
-
-        UIState.CREATE_SCREEN -> {
-            CreateTableScreen(
-                onTakeData = {
-                    subjectName, labCount, stepsCount, gradeMethod ->
-                    vm.createNewSubject(subjectName, labCount, stepsCount, gradeMethod)
-                    vm.changeUIState(UIState.SELECT_SCREEN)
-                },
-                onClickBack = { vm.changeUIState(UIState.START_SCREEN) }
-            )
-        }
     }
 
 }
 
 @Composable
 fun DefaultScreenHead(stringInHead: String, arrowBackAction: () -> Unit) {
+
+    BackHandler(enabled = true) {
+        arrowBackAction()
+    }
 
     Box(
         modifier = Modifier.fillMaxWidth()

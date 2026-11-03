@@ -1,5 +1,6 @@
 package home.babbakappa.labflow.appui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,8 +66,8 @@ val DEFAULT_BOX_HEIGHT = 64.dp
 val DEFAULT_BOX_WIDTH = 64.dp
 val DESCRIPTION_BOX_HEIGHT = 64.dp
 val DESCRIPTION_BOX_WIDTH = 64.dp * 5f
-val CORNER_DEGREE = 6.dp
-val BOX_BORDER_WIDTH = 2.dp
+val CORNER_DEGREE = 12.dp
+val BOX_BORDER_WIDTH = 1.dp
 
 val RESULT_BOX_WIDTH = (64 + 24).dp
 
@@ -245,22 +246,24 @@ fun ThingAboveOneLine(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .width(DEFAULT_BOX_WIDTH)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(CORNER_DEGREE)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = headers[0],
-                fontWeight = FontWeight.Bold,
+        if (task.status2 != NOT_ACTIVE) {
+            Box(
                 modifier = Modifier
-                    .clickable { firstDialogIsOpen = true },
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+                    .width(DEFAULT_BOX_WIDTH)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(CORNER_DEGREE)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = headers[0],
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { firstDialogIsOpen = true },
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
 
         if (task.status2 != NOT_ACTIVE) {
@@ -326,21 +329,24 @@ fun ThingAboveOneLine(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .width(DEFAULT_BOX_WIDTH)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(CORNER_DEGREE)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Оценка",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+        if (task.status2 != NOT_ACTIVE) {
+            Box(
+                modifier = Modifier
+                    .width(DEFAULT_BOX_WIDTH)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(CORNER_DEGREE)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Оценка",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
+
 
         Box(
             modifier = Modifier
@@ -443,19 +449,21 @@ fun OneLine(
             task.labTopic,
             onChangedDescription = { newValue -> onChangedDescription(newValue, task.id) }
         )
-        StepsStatuses(
-            task.status1,
-            task.status2,
-            task.status3,
-            task.status4,
-            onStatusChange = { num, st -> onChangedStatus(num, st, task.id) }
-        )
-        GradeBox(
-            task.grade,
-            onChangedGrade = {
-                newGrade -> onChangedGrade(newGrade, task.id)
-            }
-        )
+        if (task.status2 != NOT_ACTIVE) {
+            StepsStatuses(
+                task.status1,
+                task.status2,
+                task.status3,
+                task.status4,
+                onStatusChange = { num, st -> onChangedStatus(num, st, task.id) }
+            )
+            GradeBox(
+                task.grade,
+                onChangedGrade = {
+                        newGrade -> onChangedGrade(newGrade, task.id)
+                }
+            )
+        }
         ResultBox(
             task.done,
             onValueChange = {newValue -> onChangedResult(newValue, task.id)}
@@ -704,6 +712,19 @@ fun DefaultDialogWindow(
 
 }
 
+fun quickChangeIntGrade(stringGrade: String): String {
+    return when (stringGrade) {
+
+        "Незачет" -> "0"
+        "Зачет" -> "1"
+        "2" -> "2"
+        "3" -> "3"
+        "4" -> "4"
+        "5" -> "5"
+        else -> "0"
+
+    }
+}
 
 @Composable
 fun DialogWindowForGrade(
@@ -715,6 +736,7 @@ fun DialogWindowForGrade(
 ) {
 
     var rememberedValue by remember { mutableStateOf(stringFromBox) }
+    var rememberedValueString by remember { mutableStateOf("Незачет") }
     var menuIsOpen by remember { mutableStateOf(false) }
 
     Dialog(
@@ -733,9 +755,9 @@ fun DialogWindowForGrade(
                 Column() {
 
                     OutlinedTextField(
-                        value = rememberedValue,
+                        value = rememberedValueString,
                         onValueChange = { newValue ->
-                            rememberedValue = newValue
+                            rememberedValueString = newValue
                         },
                         label = { Text(stringInField) },
                         trailingIcon = {
@@ -757,7 +779,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "0"
+                                rememberedValueString = "Незачет"
                                 menuIsOpen = false
                             },
                             text = {Text("Незачет")}
@@ -765,7 +787,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "1"
+                                rememberedValueString = "Зачет"
                                 menuIsOpen = false
                             },
                             text = {Text("Зачет")}
@@ -773,7 +795,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "2"
+                                rememberedValueString = "2"
                                 menuIsOpen = false
                             },
                             text = {Text("2")}
@@ -781,7 +803,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "3"
+                                rememberedValueString = "3"
                                 menuIsOpen = false
                             },
                             text = {Text("3")}
@@ -789,7 +811,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "4"
+                                rememberedValueString = "4"
                                 menuIsOpen = false
                             },
                             text = {Text("4")}
@@ -797,7 +819,7 @@ fun DialogWindowForGrade(
 
                         DropdownMenuItem(
                             onClick = {
-                                rememberedValue = "5"
+                                rememberedValueString = "5"
                                 menuIsOpen = false
                             },
                             text = {Text("5")}
@@ -809,7 +831,11 @@ fun DialogWindowForGrade(
 
                 Row() {
                     Button(
-                        onClick = { onChangedData(rememberedValue.toInt()) }
+                        onClick = {
+                            rememberedValue = quickChangeIntGrade(rememberedValueString)
+                            onChangedData(rememberedValue.toInt())
+                            Log.i("\uD83D\uDFE2LabFlow | Change Grade", "Строковая оценка: $rememberedValueString; числовая оценка: $rememberedValue")
+                        }
                     ) {
                         Text("Изменить")
                     }
