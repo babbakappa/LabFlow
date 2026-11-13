@@ -36,7 +36,9 @@ class MainActivity : ComponentActivity() {
 
             LabFlowTheme()
             {
-                MainHub(vm)
+                MainHub(vm, onCloseApp = {
+                    finishAffinity()
+                })
 
             }
 

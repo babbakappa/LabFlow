@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -35,7 +36,7 @@ import home.babbakappa.labflow.manager.AppViewModel
 import home.babbakappa.labflow.manager.UIState
 
 @Composable
-fun MainHub(vm: AppViewModel) {
+fun MainHub(vm: AppViewModel, onCloseApp: () -> Unit) {
 
     val tasks by vm.currentTasks.collectAsStateWithLifecycle()
     val uiState by vm.uiState.collectAsState()
@@ -46,14 +47,6 @@ fun MainHub(vm: AppViewModel) {
     val context = LocalContext.current
 
     when (uiState) {
-        UIState.START_SCREEN -> StartScreen(
-            onOpenSubjects = {
-                vm.changeUIState(UIState.SELECT_SCREEN)
-            },
-            onCreateSubject = {
-                vm.changeUIState(UIState.CREATE_SCREEN)
-            }
-        )
 
         UIState.SELECT_SCREEN -> {
             SelectScreen(
@@ -63,10 +56,13 @@ fun MainHub(vm: AppViewModel) {
                     vm.changeUIState(UIState.SUBJECT_SCREEN)
                 },
                 onClickBack = {
-                    vm.changeUIState(UIState.START_SCREEN)
+                    onCloseApp()
                 },
                 onDeleteSubject = {name ->
                     vm.deleteSubject(name)
+                },
+                onOpenCreateScreen = {
+                    vm.changeUIState(UIState.CREATE_SCREEN)
                 }
             )
         }
@@ -97,7 +93,7 @@ fun MainHub(vm: AppViewModel) {
                     vm.createNewSubject(subjectName, labCount, stepsCount, gradeMethod)
                     vm.changeUIState(UIState.SELECT_SCREEN)
                 },
-                onClickBack = { vm.changeUIState(UIState.START_SCREEN) }
+                onClickBack = { vm.changeUIState(UIState.SELECT_SCREEN) }
             )
         }
     }

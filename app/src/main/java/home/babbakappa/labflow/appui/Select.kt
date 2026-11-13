@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -43,7 +45,8 @@ fun SelectScreen(
     names: List<String>,
     onClickItem: (String) -> Unit,
     onClickBack: () -> Unit,
-    onDeleteSubject: (String) -> Unit
+    onDeleteSubject: (String) -> Unit,
+    onOpenCreateScreen: () -> Unit
 ) {
 
     Surface(
@@ -64,7 +67,9 @@ fun SelectScreen(
             }
             else {
 
-                LazyColumn() {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
                     items(names) { name ->
                         SubjectItem(
                             name,
@@ -77,7 +82,7 @@ fun SelectScreen(
                 }
 
             }
-
+            BottomNavigationPanel(onOpenCreateScreen = onOpenCreateScreen)
         }
 
     }
@@ -172,6 +177,29 @@ fun ThreeDotsMenu(
             text = {Text("Удалить")},
             onClick = onDeleteSubject
         )
+
+    }
+
+}
+
+@Composable
+fun BottomNavigationPanel(onOpenCreateScreen: () -> Unit) {
+
+    Box(
+        modifier = Modifier.fillMaxWidth().height(56.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Button(onClick = onOpenCreateScreen) {
+                Text("Создать")
+            }
+
+        }
 
     }
 

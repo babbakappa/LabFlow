@@ -31,7 +31,7 @@ class AppViewModel(private val db: DatabaseDAO) : ViewModel() {
 
     private var appContext: Context? = null
 
-    private val _uiState = MutableStateFlow(UIState.START_SCREEN)
+    private val _uiState = MutableStateFlow(UIState.SELECT_SCREEN)
     val uiState = _uiState.asStateFlow()
     private val _currentSubject = MutableStateFlow("")
     val currentSubject = _currentSubject.asStateFlow()
